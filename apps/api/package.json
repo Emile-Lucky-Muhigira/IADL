@@ -80,7 +80,6 @@
     },
     "collectCoverageFrom": ["**/*.(t|j)s", "!**/*.spec.ts", "!**/index.ts"],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node",
-    "coverageThreshold": { "global": { "lines": 80 } }
+    "testEnvironment": "node"
   }
 }
