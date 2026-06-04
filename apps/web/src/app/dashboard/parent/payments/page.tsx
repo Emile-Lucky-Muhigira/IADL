@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
@@ -10,7 +11,7 @@ import { financeApi } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { DollarSign, AlertCircle } from 'lucide-react';
 
-export default function ParentPaymentsPage() {
+function ParentPaymentsContent() {
   const { data: session } = useSession();
   const userId = (session?.user as any)?.id;
   const params = useSearchParams();
@@ -56,5 +57,13 @@ export default function ParentPaymentsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ParentPaymentsPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading…</div>}>
+      <ParentPaymentsContent />
+    </Suspense>
   );
 }

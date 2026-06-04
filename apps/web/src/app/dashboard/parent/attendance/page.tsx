@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
@@ -10,7 +11,7 @@ import { attendanceApi } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { TrendingUp, Calendar, CheckCircle } from 'lucide-react';
 
-export default function ParentAttendancePage() {
+function ParentAttendanceContent() {
   const { data: session } = useSession();
   const userId = (session?.user as any)?.id;
   const params = useSearchParams();
@@ -47,5 +48,13 @@ export default function ParentAttendancePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ParentAttendancePage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading…</div>}>
+      <ParentAttendanceContent />
+    </Suspense>
   );
 }
