@@ -1,0 +1,34 @@
+# Dependencies
+node_modules
+
+# Build output
+.turbo
+dist
+.next
+build
+coverage
+
+# Environment files (never commit real secrets)
+*.env
+.env.local
+.env.*.local
+!.env.example
+!.env.production.example
+
+# Logs & OS files
+*.log
+.DS_Store
+Thumbs.db
+
+# Local AI assistant / editor configuration (not part of the codebase)
+.claude/
+
+# Confidential source documents — must NOT be published to GitHub
+_specs/
+extracted/
+*.zip
+*.docx
+*.pdf
+
+# NOTE: Prisma migrations ARE committed (required for `prisma migrate deploy`
+# in CI/CD and production). Do not ignore apps/api/prisma/migrations.

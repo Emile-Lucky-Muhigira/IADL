@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADL_ADMIN
+  SCHOOL_GATEKEEPER
+  TRAINER
+  STUDENT
+  PARENT
+  ACCOUNTANT
+  SYSTEM_AUDITOR
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+  SUSPENDED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum AssessmentType {
+  QUIZ
+  ASSIGNMENT
+  PROJECT
+  EXAM
+}
+
+enum LedgerType {
+  DEBIT
+  CREDIT
+  REFUND
+}
+
+enum NotificationChannel {
+  IN_APP
+  SMS
+  EMAIL
+  PUSH
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String   @unique
+  logoUrl   String?
+  address   String?
+  phone     String?
+  email     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  courses       Course[]
+  ledgerEntries LedgerEntry[]
+  sessions      Session[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String?
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  avatarUrl    String?
+  role         UserRole
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant             Tenant?              @relation(fields: [tenantId], references: [id])
+  enrollments        Enrollment[]
+  attendances        AttendanceRecord[]
+  ledgerEntries      LedgerEntry[]
+  certificates       Certificate[]
+  trainedCourses     Course[]             @relation("CourseTrainers")
+  childRelations     ParentStudent[]      @relation("ParentUser")
+  parentRelations    ParentStudent[]      @relation("StudentUser")
+  sentMessages       Message[]            @relation("MessageSender")
+  receivedMessages   MessageRecipient[]
+  notifications      Notification[]
+  submissions        AssessmentSubmission[]
+  gradedSubmissions  AssessmentSubmission[] @relation("GradedBy")
+
+  @@index([tenantId])
+  @@index([role])
+  @@map("users")
+}
+
+model ParentStudent {
+  id        String @id @default(cuid())
+  parentId  String
+  studentId String
+
+  parent  User @relation("ParentUser", fields: [parentId], references: [id], onDelete: Cascade)
+  student User @relation("StudentUser", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, studentId])
+  @@map("parent_students")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  tenantId    String
+  title       String
+  description String?
+  syllabus    String?
+  price       Decimal  @db.Decimal(10, 2)
+  duration    Int
+  thumbnailUrl String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+  trainers    User[]       @relation("CourseTrainers")
+  enrollments Enrollment[]
+  sessions    Session[]
+  assessments Assessment[]
+  certificates Certificate[]
+
+  @@index([tenantId])
+  @@map("courses")
+}
+
+model Enrollment {
+  id         String           @id @default(cuid())
+  userId     String
+  courseId   String
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  courseId     String
+  tenantId     String
+  title        String
+  description  String?
+  scheduledAt  DateTime
+  duration     Int
+  isLive       Boolean  @default(false)
+  meetingUrl   String?
+  recordingUrl String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  course      Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  attendances AttendanceRecord[]
+
+  @@index([courseId])
+  @@index([tenantId])
+  @@index([scheduledAt])
+  @@map("sessions")
+}
+
+model AttendanceRecord {
+  id        String           @id @default(cuid())
+  userId    String
+  sessionId String
+  status    AttendanceStatus @default(ABSENT)
+  markedAt  DateTime         @default(now())
+  notes     String?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sessionId])
+  @@index([sessionId])
+  @@map("attendance_records")
+}
+
+model Assessment {
+  id          String         @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  type        AssessmentType
+  dueDate     DateTime?
+  maxScore    Int            @default(100)
+  fileUrl     String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  course      Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions AssessmentSubmission[]
+
+  @@index([courseId])
+  @@map("assessments")
+}
+
+model AssessmentSubmission {
+  id           String    @id @default(cuid())
+  assessmentId String
+  studentId    String
+  fileUrl      String?
+  content      String?
+  score        Int?
+  feedback     String?
+  gradedById   String?
+  submittedAt  DateTime  @default(now())
+  gradedAt     DateTime?
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  gradedBy   User?      @relation("GradedBy", fields: [gradedById], references: [id])
+
+  @@unique([assessmentId, studentId])
+  @@index([assessmentId])
+  @@map("assessment_submissions")
+}
+
+model LedgerEntry {
+  id          String     @id @default(cuid())
+  tenantId    String
+  userId      String
+  type        LedgerType
+  amount      Decimal    @db.Decimal(10, 2)
+  description String
+  reference   String?    @unique
+  balance     Decimal    @db.Decimal(10, 2)
+  createdById String
+  createdAt   DateTime   @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("ledger_entries")
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  templateUrl String?
+  pdfUrl      String?
+  uniqueCode  String   @unique @default(cuid())
+  issuedAt    DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@map("certificates")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  senderId  String
+  subject   String?
+  content   String
+  createdAt DateTime @default(now())
+
+  sender     User               @relation("MessageSender", fields: [senderId], references: [id])
+  recipients MessageRecipient[]
+
+  @@index([senderId])
+  @@map("messages")
+}
+
+model MessageRecipient {
+  id        String    @id @default(cuid())
+  messageId String
+  userId    String
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId])
+  @@map("message_recipients")
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  channel   NotificationChannel @default(IN_APP)
+  isRead    Boolean             @default(false)
+  metadata  Json?
+  createdAt DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  tenantId   String?
+  action     String
+  resource   String
+  resourceId String?
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

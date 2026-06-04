@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-rgb: 0 144 184;
+  }
+
+  *        { @apply border-gray-200 dark:border-gray-700; }
+  html     { @apply scroll-smooth; }
+  body     { @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased; }
+  ::selection { @apply bg-brand-200 dark:bg-brand-700; }
+}
+
+@layer components {
+  /* ── Cards ──────────────────────────────────────────── */
+  .card      { @apply bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm; }
+  .stat-card { @apply card p-6; }
+
+  /* ── Buttons ─────────────────────────────────────────── */
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-700 active:bg-brand-800
+           dark:bg-brand-600 dark:hover:bg-brand-500
+           text-white font-medium px-4 py-2 rounded-lg
+           transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 active:bg-gray-100
+           dark:bg-gray-800 dark:hover:bg-gray-700 dark:active:bg-gray-600
+           text-gray-700 dark:text-gray-200
+           font-medium px-4 py-2 rounded-lg
+           border border-gray-300 dark:border-gray-600
+           transition-colors duration-150;
+  }
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg
+           transition-colors duration-150 disabled:opacity-50;
+  }
+
+  /* ── Form controls ───────────────────────────────────── */
+  .input {
+    @apply w-full rounded-lg border border-gray-300 dark:border-gray-600
+           bg-white dark:bg-gray-800
+           text-gray-900 dark:text-gray-100
+           placeholder:text-gray-400 dark:placeholder:text-gray-500
+           px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
+           transition-colors duration-150;
+  }
+  .label { @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1; }
+  select.input { @apply cursor-pointer; }
+  textarea.input { @apply resize-y; }
+
+  /* ── Badges ──────────────────────────────────────────── */
+  .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+
+  /* ── Sidebar ─────────────────────────────────────────── */
+  .sidebar-bg  { @apply bg-brand-900 dark:bg-gray-900; }
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150;
+  }
+  .sidebar-item-inactive { @apply text-brand-200 dark:text-gray-400 hover:bg-brand-800 dark:hover:bg-gray-800; }
+  .sidebar-item-active   { @apply bg-white dark:bg-brand-600 text-brand-900 dark:text-white; }
+}
