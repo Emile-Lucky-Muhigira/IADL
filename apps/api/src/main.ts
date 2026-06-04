@@ -14,7 +14,8 @@ async function bootstrap() {
   });
 
   const config = app.get(ConfigService);
-  const port = config.get<number>('API_PORT', 3001);
+  // Cloud platforms (Render, Railway, etc.) inject PORT; fall back to API_PORT locally.
+  const port = process.env.PORT ? Number(process.env.PORT) : config.get<number>('API_PORT', 3001);
   const nodeEnv = config.get<string>('NODE_ENV', 'development');
 
   app.use(helmet());
@@ -67,7 +68,7 @@ async function bootstrap() {
     });
   }
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`IADL EMIS API running on http://localhost:${port}/api/v1`);
   if (nodeEnv !== 'production') {
     console.log(`Swagger docs at http://localhost:${port}/api/docs`);

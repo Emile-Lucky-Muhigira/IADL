@@ -1,7 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { BullModule } from '@nestjs/bull';
 import { HealthModule } from './modules/health/health.module';
 import { AuditMiddleware } from './common/middleware/audit.middleware';
 import { PrismaModule } from './prisma/prisma.module';
@@ -24,13 +23,6 @@ import { MessagesModule } from './modules/messages/messages.module';
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
 
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
-
-    BullModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        redis: { host: 'localhost', port: 6379, url: config.get('REDIS_URL') },
-      }),
-    }),
 
     PrismaModule,
     AuthModule,
