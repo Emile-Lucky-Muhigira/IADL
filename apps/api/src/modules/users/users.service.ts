@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from '../auth/auth.service';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { UserRole } from '../../common/enums/roles.enum';
-import { AuthUser, assertSameTenant } from '../../common/utils/tenant.util';
+import { AuthUser, assertSameTenant, isGlobalRole } from '../../common/utils/tenant.util';
 
 @Injectable()
 export class UsersService {
@@ -77,6 +77,15 @@ export class UsersService {
 
   async update(id: string, dto: UpdateUserDto, actor: Pick<AuthUser, 'role' | 'tenantId'>) {
     await this.findOne(id, actor);
+
+    // Non-global admins (e.g. gatekeepers) may not assign elevated/global roles.
+    if (dto.role && !isGlobalRole(actor.role)) {
+      const allowed = [UserRole.TRAINER, UserRole.STUDENT, UserRole.ACCOUNTANT, UserRole.PARENT, UserRole.SYSTEM_AUDITOR];
+      if (!allowed.includes(dto.role)) {
+        throw new ForbiddenException('You cannot assign this role');
+      }
+    }
+
     return this.prisma.user.update({
       where: { id },
       data: dto,

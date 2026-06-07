@@ -38,6 +38,16 @@ export const usersApi = {
   create: (data: any) => api.post('/users', data),
   get: (id: string) => api.get(`/users/${id}`),
   update: (id: string, data: any) => api.patch(`/users/${id}`, data),
+  remove: (id: string) => api.delete(`/users/${id}`),
+};
+
+export const tenantsApi = {
+  list: (params?: Record<string, any>) => api.get('/tenants', { params }),
+  create: (data: any) => api.post('/tenants', data),
+  get: (id: string) => api.get(`/tenants/${id}`),
+  stats: (id: string) => api.get(`/tenants/${id}/stats`),
+  update: (id: string, data: any) => api.patch(`/tenants/${id}`, data),
+  remove: (id: string) => api.delete(`/tenants/${id}`),
 };
 
 export const coursesApi = {
@@ -45,6 +55,7 @@ export const coursesApi = {
   create: (data: any) => api.post('/courses', data),
   get: (id: string) => api.get(`/courses/${id}`),
   update: (id: string, data: any) => api.patch(`/courses/${id}`, data),
+  remove: (id: string) => api.delete(`/courses/${id}`),
 };
 
 export const enrollmentsApi = {
