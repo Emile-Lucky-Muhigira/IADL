@@ -1,8 +1,10 @@
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { HealthModule } from './modules/health/health.module';
-import { AuditMiddleware } from './common/middleware/audit.middleware';
+import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { AuditModule } from './modules/audit/audit.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
@@ -38,11 +40,9 @@ import { MessagesModule } from './modules/messages/messages.module';
     NotificationsModule,
     MessagesModule,
     AnalyticsModule,
+    AuditModule,
     HealthModule,
   ],
+  providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuditMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

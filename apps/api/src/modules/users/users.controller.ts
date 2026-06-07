@@ -1,7 +1,16 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { IsString, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
+
+class ResetPasswordDto {
+  @ApiProperty({ minLength: 8 })
+  @IsString()
+  @MinLength(8)
+  newPassword: string;
+}
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserRole } from '../../common/enums/roles.enum';
@@ -27,10 +36,12 @@ export class UsersController {
   @ApiOperation({ summary: 'List users with optional filters' })
   @ApiQuery({ name: 'tenantId', required: false })
   @ApiQuery({ name: 'role', enum: UserRole, required: false })
+  @ApiQuery({ name: 'search', required: false })
   findAll(
     @CurrentUser() currentUser: any,
     @Query('tenantId') tenantId?: string,
     @Query('role') role?: UserRole,
+    @Query('search') search?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
   ) {
@@ -38,7 +49,7 @@ export class UsersController {
     const effectiveTenantId = globalRoles.includes(currentUser.role)
       ? tenantId
       : currentUser.tenantId;
-    return this.usersService.findAll(effectiveTenantId, role, page, limit);
+    return this.usersService.findAll(effectiveTenantId, role, page, limit, search);
   }
 
   @Get(':id')
@@ -63,6 +74,13 @@ export class UsersController {
   @ApiOperation({ summary: 'Deactivate a user' })
   deactivate(@Param('id') id: string, @CurrentUser() user: any) {
     return this.usersService.deactivate(id, user);
+  }
+
+  @Post(':id/reset-password')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADL_ADMIN, UserRole.SCHOOL_GATEKEEPER)
+  @ApiOperation({ summary: "Reset a user's password (admin)" })
+  resetPassword(@Param('id') id: string, @Body() dto: ResetPasswordDto, @CurrentUser() user: any) {
+    return this.usersService.resetPassword(id, dto.newPassword, user);
   }
 
   @Post(':parentId/link-student/:studentId')

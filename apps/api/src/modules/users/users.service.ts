@@ -35,11 +35,18 @@ export class UsersService {
     });
   }
 
-  async findAll(tenantId?: string, role?: UserRole, page = 1, limit = 20) {
+  async findAll(tenantId?: string, role?: UserRole, page = 1, limit = 20, search?: string) {
     const skip = (page - 1) * limit;
     const where: any = {};
     if (tenantId) where.tenantId = tenantId;
     if (role) where.role = role;
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -99,6 +106,13 @@ export class UsersService {
   async deactivate(id: string, actor: Pick<AuthUser, 'role' | 'tenantId'>) {
     await this.findOne(id, actor);
     return this.prisma.user.update({ where: { id }, data: { isActive: false } });
+  }
+
+  async resetPassword(id: string, newPassword: string, actor: Pick<AuthUser, 'role' | 'tenantId'>) {
+    await this.findOne(id, actor); // enforces tenant scope
+    const passwordHash = await this.authService.hashPassword(newPassword);
+    await this.prisma.user.update({ where: { id }, data: { passwordHash } });
+    return { message: 'Password reset successfully' };
   }
 
   async linkParentToStudent(parentId: string, studentId: string, actor: Pick<AuthUser, 'role' | 'tenantId'>) {

@@ -61,6 +61,17 @@ export class AuthService {
     });
   }
 
+  async updateProfile(userId: string, dto: { firstName?: string; lastName?: string; phone?: string; avatarUrl?: string }) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: dto,
+      select: {
+        id: true, email: true, firstName: true, lastName: true,
+        phone: true, avatarUrl: true, role: true, tenantId: true,
+      },
+    });
+  }
+
   async changePassword(userId: string, dto: ChangePasswordDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException('User not found');

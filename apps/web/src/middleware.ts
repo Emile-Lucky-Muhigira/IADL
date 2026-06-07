@@ -8,6 +8,8 @@ const ALL_ROLES = [
 
 const ROLE_PATHS: Record<string, string[]> = {
   '/dashboard/notifications': ALL_ROLES,
+  '/dashboard/profile':       ALL_ROLES,
+  '/dashboard/audit':         ['SUPER_ADMIN', 'ADL_ADMIN', 'SYSTEM_AUDITOR'],
   '/dashboard/super-admin':   ['SUPER_ADMIN'],
   '/dashboard/adl-admin':     ['SUPER_ADMIN', 'ADL_ADMIN'],
   '/dashboard/gatekeeper':    ['SUPER_ADMIN', 'ADL_ADMIN', 'SCHOOL_GATEKEEPER'],

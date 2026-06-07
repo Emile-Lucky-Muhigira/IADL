@@ -6,7 +6,7 @@ import { cn, getInitials, getRoleLabel } from '@/lib/utils';
 import {
   LayoutDashboard, Users, BookOpen, ClipboardList, BarChart3,
   DollarSign, Award, Bell, MessageSquare, LogOut, GraduationCap,
-  Building2, CalendarDays, CheckSquare, UserCheck,
+  Building2, CalendarDays, CheckSquare, UserCheck, ScrollText, Settings,
 } from 'lucide-react';
 
 interface NavItem { label: string; href: string; icon: React.ElementType }
@@ -17,6 +17,7 @@ const navByRole: Record<string, NavItem[]> = {
     { label: 'Schools',    href: '/dashboard/super-admin/schools',     icon: Building2 },
     { label: 'Users',      href: '/dashboard/super-admin/users',       icon: Users },
     { label: 'Analytics',  href: '/dashboard/super-admin/analytics',   icon: BarChart3 },
+    { label: 'Audit Trail',href: '/dashboard/audit',                   icon: ScrollText },
   ],
   ADL_ADMIN: [
     { label: 'Dashboard',    href: '/dashboard/adl-admin',              icon: LayoutDashboard },
@@ -26,6 +27,7 @@ const navByRole: Record<string, NavItem[]> = {
     { label: 'Finance',      href: '/dashboard/adl-admin/finance',       icon: DollarSign },
     { label: 'Certificates', href: '/dashboard/adl-admin/certificates',  icon: Award },
     { label: 'Analytics',    href: '/dashboard/adl-admin/analytics',     icon: BarChart3 },
+    { label: 'Audit Trail',  href: '/dashboard/audit',                   icon: ScrollText },
   ],
   SCHOOL_GATEKEEPER: [
     { label: 'Dashboard',  href: '/dashboard/gatekeeper',               icon: LayoutDashboard },
@@ -70,6 +72,7 @@ const navByRole: Record<string, NavItem[]> = {
     { label: 'Attendance', href: '/dashboard/auditor/attendance',       icon: ClipboardList },
     { label: 'Finance',    href: '/dashboard/auditor/finance',          icon: DollarSign },
     { label: 'Analytics',  href: '/dashboard/auditor/analytics',        icon: BarChart3 },
+    { label: 'Audit Trail',href: '/dashboard/audit',                    icon: ScrollText },
   ],
 };
 
@@ -131,6 +134,13 @@ export function Sidebar() {
             <p className="text-xs text-brand-300 dark:text-gray-400 truncate">{getRoleLabel(role)}</p>
           </div>
         </div>
+        <Link
+          href="/dashboard/profile"
+          className={cn('sidebar-item', pathname === '/dashboard/profile' ? 'sidebar-item-active' : 'sidebar-item-inactive')}
+        >
+          <Settings className="w-4 h-4" />
+          My Profile
+        </Link>
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm

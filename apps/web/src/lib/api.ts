@@ -23,6 +23,14 @@ export const authApi = {
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
   me: () => api.get('/auth/me'),
+  updateProfile: (data: { firstName?: string; lastName?: string; phone?: string; avatarUrl?: string }) =>
+    api.patch('/auth/profile', data),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post('/auth/change-password', { currentPassword, newPassword }),
+};
+
+export const auditApi = {
+  list: (params?: Record<string, any>) => api.get('/audit', { params }),
 };
 
 export const analyticsApi = {
@@ -39,6 +47,7 @@ export const usersApi = {
   get: (id: string) => api.get(`/users/${id}`),
   update: (id: string, data: any) => api.patch(`/users/${id}`, data),
   remove: (id: string) => api.delete(`/users/${id}`),
+  resetPassword: (id: string, newPassword: string) => api.post(`/users/${id}/reset-password`, { newPassword }),
 };
 
 export const tenantsApi = {
