@@ -79,8 +79,8 @@ export default function TrainerAttendancePage() {
             </div>
             <div className="space-y-2">
               {low.map((s: any) => (
-                <div key={s.student.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                  <div><p className="text-sm font-medium">{s.student.firstName} {s.student.lastName}</p></div>
+                <div key={s.student.id} className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/40 rounded-lg">
+                  <div><p className="text-sm font-medium text-gray-900 dark:text-gray-100">{s.student.firstName} {s.student.lastName}</p></div>
                   <Badge variant="orange">{s.attendanceRate}%</Badge>
                 </div>
               ))}

@@ -151,11 +151,11 @@ export default function SessionDetailPage() {
         {/* Stats summary */}
         <div className="grid grid-cols-5 gap-3">
           {[
-            { label: 'Present', count: stats.present, color: 'text-green-600 bg-green-50 border-green-200' },
-            { label: 'Absent', count: stats.absent, color: 'text-red-600 bg-red-50 border-red-200' },
-            { label: 'Late', count: stats.late, color: 'text-orange-600 bg-orange-50 border-orange-200' },
-            { label: 'Excused', count: stats.excused, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-            { label: 'Unmarked', count: stats.unmarked, color: 'text-gray-600 bg-gray-50 border-gray-200' },
+            { label: 'Present', count: stats.present, color: 'text-green-600 bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800' },
+            { label: 'Absent', count: stats.absent, color: 'text-red-600 bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800' },
+            { label: 'Late', count: stats.late, color: 'text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-950/30 dark:border-orange-800' },
+            { label: 'Excused', count: stats.excused, color: 'text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800' },
+            { label: 'Unmarked', count: stats.unmarked, color: 'text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-800/40 dark:border-gray-700' },
           ].map((s) => (
             <div key={s.label} className={`rounded-xl border p-3 text-center ${s.color}`}>
               <p className="text-2xl font-bold">{s.count}</p>

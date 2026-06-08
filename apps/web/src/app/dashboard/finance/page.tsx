@@ -49,9 +49,9 @@ export default function FinanceDashboard() {
             <h2 className="text-base font-semibold mb-4">Outstanding Balances</h2>
             <div className="space-y-2">
               {outstanding.slice(0, 8).map((s: any) => (
-                <div key={s.id} className="flex items-center justify-between p-3 border border-red-50 bg-red-50 rounded-lg">
+                <div key={s.id} className="flex items-center justify-between p-3 border border-red-100 dark:border-red-900/40 bg-red-50 dark:bg-red-950/40 rounded-lg">
                   <div>
-                    <p className="text-sm font-medium">{s.firstName} {s.lastName}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{s.firstName} {s.lastName}</p>
                     <p className="text-xs text-gray-500">{s.email}</p>
                   </div>
                   <span className="text-sm font-semibold text-red-600">{formatCurrency(s.balance)}</span>
