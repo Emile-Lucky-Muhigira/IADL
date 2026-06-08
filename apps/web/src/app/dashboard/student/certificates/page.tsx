@@ -1,19 +1,38 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Topbar } from '@/components/layout/topbar';
 import { PageHeader } from '@/components/ui/page-header';
 import { certificatesApi } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { Award, Download } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
+import { downloadCertificatePdf } from '@/lib/certificate-pdf';
 
 export default function StudentCertificatesPage() {
+  const { data: session } = useSession();
   const { data, isLoading } = useQuery({
     queryKey: ['certificates', 'my'],
     queryFn: () => certificatesApi.mine() as any,
   });
 
   const certs: any[] = (data as any)?.data ?? [];
+
+  const studentName =
+    (session?.user as any)?.name ||
+    [(session?.user as any)?.firstName, (session?.user as any)?.lastName].filter(Boolean).join(' ') ||
+    'Student';
+
+  const handleDownload = (c: any) => {
+    downloadCertificatePdf({
+      studentName:
+        [c.user?.firstName, c.user?.lastName].filter(Boolean).join(' ') || studentName,
+      courseTitle: c.course?.title || 'Course',
+      issuedAt: c.issuedAt,
+      uniqueCode: c.uniqueCode,
+      schoolName: c.tenant?.name,
+    });
+  };
 
   return (
     <div>
@@ -37,9 +56,16 @@ export default function StudentCertificatesPage() {
                 <h3 className="font-bold text-gray-900 mb-1">{c.course?.title}</h3>
                 <p className="text-xs text-gray-500 mb-3">Issued: {formatDate(c.issuedAt)}</p>
                 <p className="text-xs text-brand-600 font-mono bg-brand-50 px-2 py-1 rounded mb-3">{c.uniqueCode}</p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 mb-4">
                   Verify at: <span className="text-brand-600">/certificates/verify/{c.uniqueCode}</span>
                 </p>
+                <button
+                  onClick={() => handleDownload(c)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download Certificate
+                </button>
               </div>
             ))}
           </div>
